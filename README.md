@@ -110,7 +110,7 @@ class TEZCatSource : public SN::CatSource {
 public:
   virtual void GetAvailableCats(std::function<void(std::string)> callback) override {
     for(auto&& f : tez) {
-      if(if.is_directory()) continue;
+      if(f.is_directory()) continue;
       auto& filename = f.get_filename();
       if(filename.length() <= 10) continue;
       if(filename.compare(0, 5, "lang/") != 0) continue;
