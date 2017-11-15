@@ -42,6 +42,8 @@ namespace {
     }
     virtual pos_type seekpos(pos_type off,
                              std::ios_base::openmode which) override {
+      (void)which;
+      assert(which == std::istream::in);
       if(off < 0) off = 0;
       else if(off > end_pos - start_pos) off = end_pos - start_pos;
       cur_pos = start_pos + off;
@@ -129,6 +131,8 @@ namespace {
     }
     virtual pos_type seekpos(pos_type off,
                              std::ios_base::openmode which) override {
+      (void)which;
+      assert(which == std::istream::in);
       if(off < 0) off = 0;
       else if(off > out_end_pos) off = out_end_pos;
       if(off < out_cur_pos) {
