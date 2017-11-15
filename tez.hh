@@ -61,54 +61,13 @@ namespace TEZ {
 #endif
     uint32_t read_eocd(ssize_t);
     void read_central_directory(uint32_t);
+    using iterator_traits = std::iterator_traits<file*>;
   public:
     void read_for_file(void* buffer, uint32_t offset, uint32_t length);
     typedef file* iterator;
     typedef file* const_iterator;
-    class reverse_iterator {
-      file* p;
-      reverse_iterator(file* p) : p(p) {}
-    public:
-      reverse_iterator& operator++() { --p; return *this; }
-      reverse_iterator operator++(int) {
-        reverse_iterator ret = *this;
-        --p;
-        return ret;
-      }
-      reverse_iterator& operator--() { ++p; return *this; }
-      reverse_iterator operator--(int) {
-        reverse_iterator ret = *this;
-        ++p;
-        return ret;
-      }
-      template<class T> reverse_iterator operator+(T op) const {
-        return reverse_iterator(p - op);
-      }
-      template<class T> reverse_iterator operator-(T op) const {
-        return reverse_iterator(p + op);
-      }
-      template<class T> reverse_iterator& operator+=(T op) {
-        p -= op;
-        return *this;
-      }
-      template<class T> reverse_iterator& operator-=(T op) {
-        p += op;
-        return *this;
-      }
-      auto operator-(const reverse_iterator& op) {
-        return op.p - p;
-      }
-      file& operator*() const { return *(p-1); }
-      file* operator->() const { return p-1; }
-      template<class T> const file& operator[](T op) const { return p[-op-1]; }
-      bool operator<(reverse_iterator op) const { return p > op.p; }
-      bool operator>(reverse_iterator op) const { return p < op.p; }
-      bool operator<=(reverse_iterator op) const { return p >= op.p; }
-      bool operator>=(reverse_iterator op) const { return p <= op.p; }
-      bool operator==(reverse_iterator op) const { return p == op.p; }
-      bool operator!=(reverse_iterator op) const { return p != op.p; }
-    };
-    typedef reverse_iterator const_reverse_iterator;
+    using reverse_iterator = std::reverse_iterator<iterator>;
+    using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     // you need to call init!
     archive() : stream(&buf), streampos(0) {}
     // initializes the archive
@@ -132,16 +91,20 @@ namespace TEZ {
     auto end() const { return get() + file_count; }
     auto cbegin() const { return get(); }
     auto cend() const { return get() + file_count; }
-    auto rbegin() const { return get() + file_count; }
-    auto rend() const { return get(); }
-    auto crbegin() const { return get() + file_count; }
-    auto crend() const { return get(); }
-    template<class T> auto& operator[](T op) const { return begin()[op]; }
-    template<class T> auto operator+(T op) const { return begin()+op; }
-    template<class T> auto& at(T op) const {
-      if(op < 0 || op >= file_count)
+    auto rbegin() const { return reverse_iterator(get() + file_count); }
+    auto rend() const { return reverse_iterator(get()); }
+    auto crbegin() const { return reverse_iterator(get() + file_count); }
+    auto crend() const { return reverse_iterator(get()); }
+    auto& operator[](iterator_traits::difference_type index) const {
+      return begin()[index];
+    }
+    auto operator+(iterator_traits::difference_type index) const {
+      return begin() + index;
+    }
+    auto& at(iterator_traits::difference_type index) const {
+      if(index < 0 || index >= file_count)
         throw std::out_of_range("file index out of range");
-      return begin()[op];
+      return begin()[index];
     }
     auto& operator[](const std::string& filename) const {
       auto it = file_map.find(filename);
