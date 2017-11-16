@@ -72,6 +72,8 @@ namespace TEZ {
     archive() : stream(&buf), streampos(0) {}
     // initializes the archive
     void init(const char* argv0);
+    // frees all allocated memory for the archive
+    void purge();
     const std::string& get_comment() {
       if(!comment) comment = std::make_unique<std::string>();
       return *comment;

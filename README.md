@@ -165,6 +165,12 @@ Attempts to open the executable and read the embedded zipfile's central director
 Call this method once, preferably as early in `main()` as possible.
 
 ```c++
+void purge();
+```
+
+Call this method if you are finished with the archive and there's no further need to hold onto any information about the contained files.
+
+```c++
 const std::string& get_comment();
 ```
 
