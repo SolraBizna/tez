@@ -109,7 +109,7 @@ namespace TEZ {
     auto& operator[](const std::string& filename) const {
       auto it = file_map.find(filename);
       if(it == file_map.end())
-        throw std::out_of_range("file index out of range");
+        throw std::out_of_range("file not found");
       return (*this)[it->second];
     }
     auto find(const std::string& filename) const {
