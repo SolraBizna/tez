@@ -29,11 +29,7 @@ namespace {
 }
 
 void TEZ::archive::init(const char* argv0) {
-  file_count = 0;
-  reset();
-  buf.close();
-  file_map.clear();
-  stream.setstate(std::istream::goodbit);
+  purge();
 #if defined(WIN32)
   /* we can't use argv[0] on Windows for a number of reasons */
   (void)argv0;
@@ -106,12 +102,18 @@ void TEZ::archive::init(const char* argv0) {
     read_central_directory(cd_offset);
   }
   catch(...) {
-    file_count = 0;
-    reset();
-    buf.close();
-    file_map.clear();
+    purge();
     throw;
   }
+}
+
+void TEZ::archive::purge() {
+  file_count = 0;
+  reset();
+  buf.close();
+  file_map.clear();
+  comment.reset();
+  stream.setstate(std::istream::goodbit);
 }
 
 uint32_t TEZ::archive::read_eocd(ssize_t file_size) {
