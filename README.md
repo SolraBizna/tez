@@ -160,7 +160,7 @@ An instance of `TEZ::archive` contains information about the files present in th
 void init(const char* argv0);
 ```
 
-Attempts to open the executable and read the embedded zipfile's central directory. On Windows, this uses `GetModuleFileName` to find the EXE. On other OSes, it tries `/proc/self/exe` if that exists, and searches based on `argv[0]` otherwise.
+Attempts to open the executable and read the embedded zipfile's central directory. On Windows, this uses `GetModuleFileName` to find the EXE. On other OSes, it tries `/proc/self/exe`/`/proc/curproc/file`/`/proc/curproc/exe` if one exists, and searches based on `argv[0]` otherwise. (Usage of `/proc` is configurable with preprocessor defines, see `tez_archive.cc` for more information.)
 
 Call this method once, preferably as early in `main()` as possible.
 

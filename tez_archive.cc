@@ -10,6 +10,21 @@
 #include <windows.h>
 #endif
 
+#ifndef TEZ_NO_PROC
+#ifdef TEZ_USE_PROC_SELF_EXE
+#define TEZ_NO_PROC_CURPROC_FILE
+#define TEZ_NO_PROC_CURPROC_EXE
+#endif
+#ifdef TEZ_USE_PROC_CURPROC_FILE
+#define TEZ_NO_PROC_SELF_EXE
+#define TEZ_NO_PROC_CURPROC_EXE
+#endif
+#ifdef TEZ_USE_PROC_CURPROC_EXE
+#define TEZ_NO_PROC_SELF_EXE
+#define TEZ_NO_PROC_CURPROC_FILE
+#endif
+#endif
+
 namespace {
   constexpr int END_OF_CENTRAL_DIRECTORY_LEN = 22;
   constexpr int CENTRAL_DIRECTORY_RECORD_LEN = 46;
@@ -55,8 +70,24 @@ void TEZ::archive::init(const char* argv0) {
   buf.open(fd);
 #else
   /* assuming a POSIX-like from here */
-  /* first try /proc/self/exe! */
-  buf.open("/proc/self/exe", std::istream::in | std::istream::binary);
+#ifndef TEZ_NO_PROC
+  /* first, try various /proc-based methods */
+#ifndef TEZ_NO_PROC_SELF_EXE
+  /* Linux */
+  if(!buf.is_open())
+    buf.open("/proc/self/exe", std::istream::in | std::istream::binary);
+#endif
+#ifndef TEZ_NO_PROC_CURPROC_FILE
+  /* Some BSDs*/
+  if(!buf.is_open())
+    buf.open("/proc/curproc/file", std::istream::in | std::istream::binary);
+#endif
+#ifndef TEZ_NO_PROC_CURPROC_EXE
+  /* Other BSDs*/
+  if(!buf.is_open())
+    buf.open("/proc/curproc/exe", std::istream::in | std::istream::binary);
+#endif
+#endif
   /* if that didn't work, let's look at argv0 */
   if(!buf.is_open() && argv0 != nullptr) {
     if(strchr(argv0, '/') != nullptr) {
